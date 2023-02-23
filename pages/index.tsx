@@ -1,12 +1,12 @@
 import type { NextPage } from "next";
-import HomeScreen from "screens/HomeScreen";
+import TaskScreen from "screens/TaskScreen";
 // import Button from "theme/Button";
 
 // import Head from "next/head";
 // import Image from "next/image";
 
 const Home: NextPage = () => {
-  return <HomeScreen />;
+  return <TaskScreen />;
 };
 
 export default Home;
