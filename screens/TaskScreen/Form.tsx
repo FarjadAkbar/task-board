@@ -40,6 +40,7 @@ export const Form: React.FC<FormProps> = ({
     useFormik({
       initialValues,
       validationSchema,
+      enableReinitialize:true,
       onSubmit: (values, { resetForm, setSubmitting }) => {
       
         handleMutate(values);

@@ -19,9 +19,7 @@ export namespace Tasks {
     id: string | null;
   };
   export type DetailResponse = {
-    title: string;
-    text: string;
-    status: any;
+    [key:string]: any;
   };
   export interface DetailAPIPayload extends DetailProps {}
 

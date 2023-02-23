@@ -26,7 +26,7 @@ import messages from "./messages";
 
 interface TaskProps {
   id: string;
-  taskId:string;
+  taskId: React.Key | null | undefined;
   task: any;
   index: number;
   color: string;
@@ -53,7 +53,7 @@ const Task: React.FC<TaskProps> = ({ id, taskId, task, index }) => {
   };
 
   const removeTask = () => {
-    deletTask.mutate({ id: `${id}` });
+    deletTask.mutate({ id: `${taskId}` });
     setConfirm(false);
   };
 

@@ -9,7 +9,7 @@ import messages from "./messages";
 import { Form } from "./Form";
 
 interface Props {
-  id: string;
+  id: React.Key | null | undefined;
   setIsEditing: any;
 }
 

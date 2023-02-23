@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Box, Button, TextField } from "@mui/material";
 // import randomColor from "randomcolor";
 
-const AddColumn = (props) => {
+const AddColumn = (props:any) => {
   const [title, setTitle] = useState("");
   const idColumn = props.columnData;
 
@@ -31,7 +31,7 @@ const AddColumn = (props) => {
   return (
     <Modal open={props.openModal} onClose={props.closeModal}>
       <Box sx={style}>
-        <form
+        {/* <form
           onSubmit={(e) => {
             e.preventDefault();
             props.addColumn(newColumn);
@@ -65,7 +65,7 @@ const AddColumn = (props) => {
           >
             Add New Column
           </Button>
-        </form>
+        </form> */}
       </Box>
     </Modal>
   );
