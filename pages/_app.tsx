@@ -2,11 +2,17 @@ import React, { useState } from "react";
 import App, { AppContext } from "next/app";
 import Head from "next/head";
 import { Router } from "next/router";
+import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { SnackbarProvider } from "notistack";
 
 import { IntlProvider } from "react-intl";
-import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
+import {
+  DehydratedState,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Hydrate } from "react-query/hydration";
 
@@ -43,11 +49,12 @@ const queryClient = new QueryClient({
   },
   queryCache,
 });
-
 class MyApp extends App<{
   locale: string;
   messages: any;
   router: Router;
+  session: Session;
+  dehydratedState: DehydratedState;
 }> {
   static async getStaticProps({
     Component,
@@ -83,13 +90,14 @@ class MyApp extends App<{
   componentDidMount(): void {
     loadSideEffects();
   }
-
   render() {
     const {
       Component,
-      pageProps: { session, ...pageProps },
+      pageProps: { ...pageProps },
       locale,
       messages,
+      dehydratedState,
+      session,
     } = this.props;
 
     return (
@@ -110,7 +118,7 @@ class MyApp extends App<{
                       horizontal: "right",
                     }}
                   >
-                    <Hydrate state={pageProps.dehydratedState}>
+                    <Hydrate state={dehydratedState}>
                       <Component {...pageProps} />
                     </Hydrate>
                   </SnackbarProvider>
