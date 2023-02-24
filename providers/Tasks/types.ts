@@ -1,18 +1,10 @@
-import { DocumentData } from "firebase/firestore";
-import { string } from "yup";
 
-export namespace Questions {
+
+export namespace Tasks {
   export type Item = {
-    que: string;
-    queNo: number | string;
-    options: string[];
-    ans: string;
-    category: string;
-  };
-
-  export type Quiz = {
-    id: string;
-    data: () => Item;
+    title: string;
+    text: string;
+    status: any;
   };
 
   // Fetch
@@ -22,19 +14,55 @@ export namespace Questions {
   };
   export interface FetchAPIPayload extends FetchProps {}
 
+   // Detail
+   export type DetailProps = {
+    id: string | null;
+  };
+  export type DetailResponse = {
+    title: string;
+    text: string;
+    status: any;
+  };
+  export interface DetailAPIPayload extends DetailProps {}
+
+
   // Create
   export type CreateProps = {};
   export type CreateResponse = {
     data: Item;
   };
   export type CreateMutationPayload = {
-    que: string;
-    queNo: number | string;
-    options: string[];
-    ans: string;
-    category: string;
+    title: string;
+    text: string;
+    status: any;
   };
   export interface CreateAPIPayload extends CreateProps {
     data: CreateMutationPayload;
   }
+
+
+   // Remove
+   export type RemoveProps = {};
+   export type RemoveResponse = {};
+   export type RemoveMutationPayload = {
+     id: string;
+   };
+   export interface RemoveAPIPayload extends RemoveMutationPayload {}
+
+
+   
+  //Update
+  export type UpdateProps = {
+    id: string;
+  };
+  export type UpdateResponse = {};
+  export type UpdateMutationPayload = {
+    title: string;
+    text: string;
+    status: any;
+  };
+  export interface UpdateAPIPayload extends UpdateProps {
+    data: UpdateMutationPayload;
+  }
 }
+

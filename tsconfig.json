@@ -19,7 +19,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx", "screens/TaskScreen/board-data.json", "screens/TaskScreen/Column.tsxx",
   ],
   "exclude": ["node_modules"]
 }

@@ -1,181 +1,123 @@
-import React, { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Card, CardContent, Typography, Grid } from "@mui/material";
-import { v4 as uuidv4 } from "uuid";
+import React, { useEffect, useState } from "react";
+import { Box, Button } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { DragDropContext } from "react-beautiful-dnd";
 
-interface Task {
-  id: string;
-  title: string;
-  status: string;
-}
-
-const initialTasks: Task[] = [
-  { id: "task-1", title: "Task 1", status: "To Do" },
-  { id: "task-2", title: "Task 2", status: "In Progress" },
-  { id: "task-3", title: "Task 3", status: "Done" },
-];
-
-const useLocalStorage = (key: string, initialValue: any) => {
-  const [state, setState] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const storedValue = localStorage.getItem(key);
-      return storedValue ? JSON.parse(storedValue) : initialValue;
-    }
-    return initialValue;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(state));
-  }, [key, state]);
-
-  return [state, setState];
-};
-
-const Task = ({ task, index, handleDeleteTask }: { task: Task; index: number; handleDeleteTask: Function }) => {
-  return (
-    <Draggable draggableId={task.id} index={index}>
-      {(provided) => (
-        <Card ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-          <CardContent>
-            <Typography variant="h5" component="h2">
-              {task.title}
-            </Typography>
-            <Typography color="textSecondary">{task.status}</Typography>
-            <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
-          </CardContent>
-        </Card>
-      )}
-    </Draggable>
-  );
-};
-
-const AddTask = ({ handleAddTask }: { handleAddTask: Function }) => {
-  const [title, setTitle] = useState("");
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (title.trim()) {
-      const newTask = { id: uuidv4(), title: title.trim(), status: "To Do" };
-      handleAddTask(newTask);
-      setTitle("");
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" placeholder="Add a task" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <button type="submit">Add</button>
-    </form>
-  );
-};
-
-// const UpdateTask = ({ task, handleUpdateTask }: { task: Task; handleUpdateTask: Function }) => {
-//   const [title, setTitle] = useState(task.title);
-//   const [status, setStatus] = useState(task.status);
-
-//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     if (title.trim()) {
-//       const updatedTask = { ...task, title: title.trim(), status };
-//       handleUpdateTask(updatedTask);
-//     }
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit}>
-//       <input type="text" placeholder="Update task" value={title} onChange={(e) => setTitle(e.target.value)} />
-//       <select value={status} onChange={(e) => setStatus(e.target.value)}>
-//         <option value="To Do">To Do</option>
-//         <option value="In Progress">In Progress</option>
-//         <option value="Done">Done</option>
-//       </select>
-//       <
+import { useFormik } from "formik";
+import { useSnackbar } from "notistack";
+import * as Yup from "yup";
 
 
+import { useTaskStatus } from "providers/TasksStatus";
+import { useTaskDetail } from "providers/Tasks";
+import FormattedMessage from "theme/FormattedMessage";
 
-
+// import AddColumn from "./AddColumn";
+import Column from "./Column";
+import TaskModal from "./Modal";
+import messages from "./messages";
 
 const TaskScreen = () => {
-  const [tasks, setTasks] = useLocalStorage("tasks", initialTasks);
+  const taskStatus = useTaskStatus();
+  
+  // const taskRef = useTaskDetail({ id: "h14k8zHXutz00l0z6Ui7" });
+  // const [openColModal, setOpenColModal] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [id, setId] = useState("");
 
-  const handleDragEnd = (result: any) => {
+  const onDragEnd = (result: {
+    destination: any;
+    source: any;
+    draggableId: any;
+  }) => {
     const { destination, source, draggableId } = result;
 
+    console.log(JSON.parse(result.draggableId), "result...........")
     if (!destination) {
+      console.log("no destination");
       return;
     }
 
-    if (destination.index === source.index && destination.droppableId === source.droppableId) {
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      console.log("index and destination the same");
       return;
     }
-
-    const sourceColumn = tasks.find((task: { status: any; }) => task.status === source.droppableId);
-    const destinationColumn = tasks.find((task: { status: any; }) => task.status === destination.droppableId);
-
-    const sourceTasks = [...sourceColumn.tasks];
-    const destinationTasks = [...destinationColumn.tasks];
-
-    const [removedTask] = sourceTasks.splice(source.index, 1);
-    destinationTasks.splice(destination.index, 0, removedTask);
-
-    setTasks((prevState: Task[]) => {
-      const newTasks = [...prevState];
-      newTasks.map((task) => {
-        if (task.id === draggableId) {
-          task.status = destination.droppableId;
-        }
-        return task;
-      });
-      return newTasks;
-    });
+    
   };
 
-  const handleAddTask = (newTask: Task) => {
-    setTasks([...tasks, newTask]);
+  const openModal = (id: string) => {
+    setId(id);
+    setModal(true);
+    setOpen(true);
   };
 
-  const handleUpdateTask = (updatedTask: Task) => {
-    setTasks((prevState: Task[]) => {
-      const newTasks = [...prevState];
-      const taskIndex = newTasks.findIndex((task) => task.id === updatedTask.id);
-      newTasks.splice(taskIndex, 1, updatedTask);
-      return newTasks;
-    });
+  const closeModal = () => {
+    setModal(false);
+    setOpen(false);
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks((prevState: Task[]) => {
-      const newTasks = prevState.filter((task) => task.id !== taskId);
-      return newTasks;
-    });
-  };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Grid container spacing={3}>
-        {["To Do", "In Progress", "Done"].map((status) => {
-          const statusTasks = tasks.filter((task: { status: string; }) => task.status === status);
-          return (
-            <Grid item key={status} xs={12} md={4}>
-              <Typography variant="h6" gutterBottom>
-                {status}
-              </Typography>
-              <Droppable droppableId={status} key={status}>
-                {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {statusTasks.map((task: Task, index: number) => (
-                      <Task key={task.id} task={task} index={index} handleDeleteTask={handleDeleteTask} />
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-              <AddTask handleAddTask={handleAddTask} />
-            </Grid>
-          );
-        })}
-      </Grid>
-    </DragDropContext>
+    <>
+      <DragDropContext onDragEnd={onDragEnd}>
+        {/* 
+        <AddColumn
+          openModal={openColModal}
+          closeModal={closeColModal}
+          addColumn={addColumn}
+          columnId={taskStatus?.data?.length + 1}
+        /> 
+        <Button
+          startIcon={<AddIcon />}
+          sx={{
+            color: "#000",
+            backgroundColor: "#eee",
+            textTransform: "none",
+            ":hover": {
+              backgroundColor: "#ddd",
+            },
+            py: 1,
+            my: 2,
+          }}
+          onClick={() => {
+            setOpenColModal(true);
+          }}
+        >
+          <FormattedMessage {...messages.addNewColumn} />
+        </Button>
+        */}
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              pt: 4,
+              justifyContent: "flex-start",
+            }}
+          >
+            {modal && (
+              <TaskModal
+                id={id}
+                openModal={open}
+                closeModal={closeModal}
+              />
+            )}
+
+            {taskStatus?.data?.map((task: any, index: any) => {
+              return (
+                <Column
+                  id={task.id}
+                  columnData={task.data()}
+                  key={index}
+                  openModal={openModal}
+                />
+              );
+            })}
+          </Box>
+        </Box>
+      </DragDropContext>
+    </>
   );
 };
 
